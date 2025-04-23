@@ -32,8 +32,8 @@ def cargar_ubicaciones_optimizado(ruta_archivo: str, chunk_size=500_000) -> pd.D
     return df
 
 def procesar_chunk(args):
-    """Procesa un chunk de datos pequeño y devuelve las aristas."""
-    chunk_file, chunk_id, chunk_size = args
+    """Procesa un chunk de datos y devuelve las aristas, filtrando por límite de nodos."""
+    chunk_file, chunk_id, chunk_size, max_node_id = args
     
     try:
         edges = []
@@ -46,13 +46,27 @@ def procesar_chunk(args):
                 if i >= (chunk_id + 1) * chunk_size:
                     break
                 
-                if not linea.strip():  # Saltar líneas vacías
+                # Saltar líneas vacías
+                if not linea.strip():
+                    continue
+                
+                # Verificar que el ID del nodo origen esté dentro del rango válido
+                if i >= max_node_id:
                     continue
                 
                 try:
                     # Procesar solo las primeras 10 conexiones por usuario para pruebas
-                    seguidores = list(map(int, linea.strip().split(', ')[:10]))
-                    edges.extend([(i, seguidor-1) for seguidor in seguidores])
+                    seguidores_raw = linea.strip().split(', ')[:10]
+                    seguidores = [int(s) for s in seguidores_raw if s.strip()]
+                    
+                    # IMPORTANTE: Filtrar los seguidores para asegurar que están dentro del rango
+                    seguidores_validos = [s for s in seguidores if 1 <= s <= max_node_id]
+                    
+                    # Añadir aristas solo para seguidores válidos
+                    # Restar 1 para ajustar a índice base-0
+                    edges.extend([(i, seguidor-1) for seguidor in seguidores_validos 
+                                 if seguidor-1 < max_node_id])
+                    
                     lines_processed += 1
                 except ValueError:
                     continue
@@ -74,6 +88,8 @@ def construir_grafo_paralelo(ruta_usuarios: str, n_usuarios: int, chunk_size=10_
     
     # Crear grafo con menos vértices para pruebas
     n_usuarios_prueba = min(n_usuarios, chunk_size * max_chunks)
+    print(f"Creando grafo con {n_usuarios_prueba} nodos")
+    
     grafo = Graph(directed=True)
     grafo.add_vertices(n_usuarios_prueba)
     
@@ -88,7 +104,8 @@ def construir_grafo_paralelo(ruta_usuarios: str, n_usuarios: int, chunk_size=10_
         # Generar chunks más pequeños para evitar saturar memoria
         chunks_args = []
         for i in range(max_chunks):
-            chunks_args.append((ruta_usuarios, i, chunk_size))
+            # Añadir max_node_id como cuarto argumento
+            chunks_args.append((ruta_usuarios, i, chunk_size, n_usuarios_prueba))
         
         # Procesar chunks uno por uno o en paralelo según capacidad
         if n_procesos == 1:
@@ -114,12 +131,23 @@ def construir_grafo_paralelo(ruta_usuarios: str, n_usuarios: int, chunk_size=10_
         
         print(f"Procesadas {total_lines} líneas con {len(all_edges)} conexiones")
         
+        # Verificar rango de IDs antes de agregar
+        invalid_edges = [(src, dst) for src, dst in all_edges 
+                        if src >= n_usuarios_prueba or dst >= n_usuarios_prueba]
+        if invalid_edges:
+            print(f"ADVERTENCIA: Eliminando {len(invalid_edges)} aristas con IDs fuera de rango")
+            all_edges = [(src, dst) for src, dst in all_edges 
+                        if src < n_usuarios_prueba and dst < n_usuarios_prueba]
+        
         # Agregar aristas al grafo en lotes pequeños para evitar picos de memoria
-        batch_size = 100000
+        batch_size = 50000
         for i in range(0, len(all_edges), batch_size):
-            grafo.add_edges(all_edges[i:i+batch_size])
-            # Forzar liberación de memoria
-            gc.collect()
+            batch = all_edges[i:i+batch_size]
+            if batch:
+                print(f"Agregando lote de {len(batch)} aristas...")
+                grafo.add_edges(batch)
+                # Forzar liberación de memoria
+                gc.collect()
         
         print(f"Grafo construido: {grafo.vcount()} nodos, {grafo.ecount()} aristas")
         
@@ -149,19 +177,34 @@ def detectar_comunidades(grafo: Graph, max_nodos=5000) -> list:
     """Aplica detección de comunidades solo a una muestra muy pequeña."""
     print(f"Aplicando detección de comunidades a una muestra de {max_nodos} nodos")
     
+    # Si el grafo no tiene aristas, devolver comunidades vacías
+    if grafo.ecount() == 0:
+        print("El grafo no tiene aristas, no se pueden detectar comunidades")
+        return [[] for _ in range(min(max_nodos, grafo.vcount()))]
+    
     # Tomar una pequeña muestra de nodos
     nodos_muestra = np.random.choice(grafo.vcount(), min(max_nodos, grafo.vcount()), replace=False)
     subgrafo = grafo.subgraph(nodos_muestra)
     
-    # Usar algoritmo rápido
-    subgrafo_undir = subgrafo.as_undirected(mode="collapse")
-    return subgrafo_undir.community_fastgreedy().as_clustering()
+    # Usar algoritmo rápido si el grafo tiene aristas
+    if subgrafo.ecount() > 0:
+        subgrafo_undir = subgrafo.as_undirected(mode="collapse")
+        if subgrafo_undir.ecount() > 0:
+            return subgrafo_undir.community_fastgreedy().as_clustering()
+    
+    # Fallback si no hay suficientes aristas
+    return [[] for _ in range(subgrafo.vcount())]
 
 # ---------------------------
 # 4. Visualización simplificada
 # ---------------------------
 def visualizar_comunidades(grafo: Graph, comunidades, ubicaciones: pd.DataFrame, muestra: int = 200) -> None:
     """Visualiza una muestra muy pequeña del grafo."""
+    # Verificar si hay aristas para visualizar
+    if grafo.ecount() == 0:
+        print("El grafo no tiene aristas para visualizar")
+        return
+    
     # Tomar muestra pequeña
     nodos_muestra = np.random.choice(grafo.vcount(), min(muestra, grafo.vcount()), replace=False)
     subgrafo = grafo.subgraph(nodos_muestra)
@@ -175,6 +218,11 @@ def visualizar_comunidades(grafo: Graph, comunidades, ubicaciones: pd.DataFrame,
             'lat': np.random.uniform(-90, 90, len(nodos_muestra)),
             'lon': np.random.uniform(-180, 180, len(nodos_muestra))
         })
+    
+    # Verificar si hay aristas en el subgrafo
+    if subgrafo.ecount() == 0:
+        print("El subgrafo muestreado no tiene aristas para visualizar")
+        return
     
     # Limitar aristas para visualización
     max_aristas = 300
@@ -244,20 +292,25 @@ def main():
         for k, v in metricas.items():
             print(f"  - {k}: {v}")
         
-        # Paso 4: Detección de comunidades simplificada
-        print("Detectando comunidades (muestra pequeña)...")
-        comunidades = detectar_comunidades(grafo, max_nodos=2000)
-        print(f"Se detectaron {len(comunidades)} comunidades")
-        
-        # Paso 5: Visualizar muestra pequeña
-        print("Preparando visualización simplificada...")
-        visualizar_comunidades(grafo, comunidades, ubicaciones, muestra=200)
+        # Continuar solo si hay aristas
+        if grafo.ecount() > 0:
+            # Paso 4: Detección de comunidades simplificada
+            print("Detectando comunidades (muestra pequeña)...")
+            comunidades = detectar_comunidades(grafo, max_nodos=2000)
+            if hasattr(comunidades, '__len__'):
+                print(f"Se detectaron {len(comunidades)} comunidades")
+            
+            # Paso 5: Visualizar muestra pequeña
+            print("Preparando visualización simplificada...")
+            visualizar_comunidades(grafo, comunidades, ubicaciones, muestra=200)
+        else:
+            print("No se detectaron aristas en el grafo. No se puede continuar con análisis de comunidades.")
         
         # Tiempo total
         tiempo_total = time.time() - tiempo_inicio
         print(f"Tiempo total de ejecución: {tiempo_total/60:.2f} minutos")
         
-        print("\nPrueba completada con éxito!")
+        print("\nPrueba completada!")
         print("Para procesar el conjunto completo, ajuste gradualmente los parámetros:")
         print("- Aumente max_chunks para procesar más usuarios")
         print("- Aumente max_procesos si su sistema lo permite")
