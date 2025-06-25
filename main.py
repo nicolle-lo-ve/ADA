@@ -1,6 +1,7 @@
 from cargador import cargar_datos_ubicaciones, cargar_datos_usuarios, analizar_formato_usuarios
 from eda import ejecutar_eda_ubicaciones, ejecutar_eda_usuarios
 from grafo import crear_grafo_desde_datos
+from grafo import Grafo
 from analizador_grafo import (
     analizar_distribucion_grados, 
     encontrar_nodos_importantes,
