@@ -57,9 +57,8 @@ Descomprimir los archivos de datos:
 ## Ejecutar el análisis completo:
 bashpython main.py 
 
-### Estructura del Código
+## Estructura del Código
 
-- El proyecto está organizado en módulos especializados para mantener la claridad y separación de responsabilidades:
   ---
 ## 1. `cargador.py` – Carga de Datos
 
