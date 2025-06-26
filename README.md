@@ -175,7 +175,7 @@ Validación de índices: Verifica que todos los IDs estén en el rango válido [
 Eliminación de duplicados: Previene aristas múltiples entre los mismos nodos
 
 ### Análisis Exploratorio de Datos (EDA)
-## Análisis de Ubicaciones Geográficas
+
 
 Distribución espacial:
 
