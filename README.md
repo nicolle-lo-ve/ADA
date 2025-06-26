@@ -57,11 +57,11 @@ Descomprimir los archivos de datos:
 ## Ejecutar el análisis completo:
 bashpython main.py 
 
-##  Estructura del Código
+### Estructura del Código
 
-El proyecto está organizado en módulos especializados para mantener la claridad y separación de responsabilidades:
+- El proyecto está organizado en módulos especializados para mantener la claridad y separación de responsabilidades:
   ---
-### 1. `cargador.py` – Carga de Datos
+## 1. `cargador.py` – Carga de Datos
 
 - Implementa carga optimizada de archivos de ubicaciones y usuarios
 - Utiliza **Polars** para procesamiento eficiente en memoria
@@ -70,7 +70,7 @@ El proyecto está organizado en módulos especializados para mantener la clarida
 
 ---
 
-### 2.  `eda.py` – Análisis Exploratorio
+## 2.  `eda.py` – Análisis Exploratorio
 
 - Generación de visualizaciones de distribución de datos
 - Detección de valores atípicos utilizando el método **IQR**
@@ -78,7 +78,7 @@ El proyecto está organizado en módulos especializados para mantener la clarida
 
 ---
 
-### 3. `grafo.py` – Estructura del Grafo
+## 3. `grafo.py` – Estructura del Grafo
 
 - Optimizado para grafos con hasta **10 millones de nodos**
 - Usa estructuras eficientes: `diccionarios`, `NumPy arrays`
@@ -90,7 +90,7 @@ El proyecto está organizado en módulos especializados para mantener la clarida
 
 ---
 
-### 4. `analizador_grafo.py` – Análisis Avanzado
+## 4. `analizador_grafo.py` – Análisis Avanzado
 
 - Distribución de grados con **muestreo estadístico**
 - Identificación de nodos importantes (centralidad de grado)
@@ -99,7 +99,7 @@ El proyecto está organizado en módulos especializados para mantener la clarida
 
 ---
 
-### 5. `main.py` – Flujo Principal
+## 5. `main.py` – Flujo Principal
 
 - Orquesta todo el proceso de análisis
 - Configuración de `logging` y manejo de errores
@@ -107,22 +107,22 @@ El proyecto está organizado en módulos especializados para mantener la clarida
 
 ---
 
-##  Algoritmos Implementados
+###  Algoritmos Implementados
 
-### Detección de Comunidades – Algoritmo Louvain
+## Detección de Comunidades – Algoritmo Louvain
 
 - Implementación **desde cero y optimizada**
 - Pre-cálculo de métricas para mejorar el rendimiento
 - Uso eficiente de estructuras de datos
 - Visualización de las comunidades detectadas
 
-### Análisis de Caminos Más Cortos
+## Análisis de Caminos Más Cortos
 
 - Implementación de **BFS** optimizado
 - Muestreo estadístico para reducir complejidad
 - Cálculo de la **distancia promedio** entre nodos
 
-### Otras Métricas de Red
+## Otras Métricas de Red
 
 - Distribución de grados
 - Identificación de nodos centrales
@@ -131,21 +131,21 @@ El proyecto está organizado en módulos especializados para mantener la clarida
 
 ---
 
-##  Optimizaciones Clave
+###  Optimizaciones Clave
 
-###  Carga de Datos
+##  Carga de Datos
 
 - Uso de **Polars** para procesamiento vectorizado
 - **Streaming** para archivos grandes
 - Procesamiento por **lotes**
 
-###  Estructuras de Datos
+##  Estructuras de Datos
 
 - `dict` para acceso O(1) a nodos y aristas
 - `NumPy arrays` para operaciones vectorizadas
 - `set` para manejo rápido de adyacencias
 
-###  Algoritmos
+##  Algoritmos
 
 - Muestreo estadístico para análisis escalables
 - Louvain optimizado con pre-cálculo de grados
@@ -189,14 +189,6 @@ python# Métricas calculadas
 - Rango de coordenadas: [lat_min, lat_max], [long_min, long_max]
 - Valores nulos por columna
 - Distribución de usuarios por región
-
-### Análisis de Conectividad Social
-
-## Distribución de grados:
-
-Número de conexiones por usuario
-Detección de usuarios altamente conectados (hubs)
-Análisis de nodos aislados
 
 
 
