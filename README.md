@@ -1,8 +1,7 @@
-#  Análisis de Redes Sociales a Gran Escala
+# Análisis-Algoritmos y Visualización del Grafo de la Red 'X'
 
 ##  Descripción del Proyecto
-
-Este proyecto implementa un sistema completo para analizar una red social masiva de **10 millones de usuarios**, cumpliendo con los requisitos de la segunda parte del proyecto final. El sistema incluye:
+Este proyecto tiene como objetivo analizar y visualizar la estructura de un grafo masivo de red social para descubrir patrones interesantes y obtener información valiosa sobre la conectividad social, las estructuras de comunidad y las propiedades fundamentales de la red, se implementa un sistema completo para analizar una red social masiva de **10 millones de usuarios**, cumpliendo con los requisitos de la segunda parte del proyecto final. El sistema incluye:
 
 - ✅ Carga eficiente de datos masivos  
 - ✅ Construcción optimizada de estructuras de grafo  
@@ -11,11 +10,57 @@ Este proyecto implementa un sistema completo para analizar una red social masiva
 - ✅ Visualización de resultados  
 
 ---
+###  Requisitos
+
+Archivos necesarios
+10_million_user.txt: Contiene las relaciones de amistad entre usuarios.
+10_million_location.txt: Contiene las coordenadas geográficas de cada usuario
+---
+###  Librerias
+- pandas
+- polars
+- matplotlib
+- seaborn
+- psutil
+- pyarrow
+
+ ---
+### Objetivos Específicos
+
+- Construcción del Grafo: Implementar la estructura de datos del grafo usando programación pura (sin herramientas externas)
+- Análisis Exploratorio: Calcular métricas básicas de la red (nodos, aristas, grado promedio, etc.)
+- Detección de Comunidades: Aplicar algoritmos como Girvan-Newman o Louvain
+- Análisis de Conectividad: Calcular caminos más cortos y árboles de expansión mínima
+- Visualización Interactiva: Crear representaciones visuales usando Plotly o Gephi
+- Análisis Geoespacial: Incorporar la información de ubicación para análisis territorial
+---  
+### Metodología
+El proyecto sigue una metodología estructurada que incluye:
+
+- Preprocesamiento y limpieza de datos
+- Análisis exploratorio de datos (EDA)
+- Implementación de algoritmos de grafos
+- Aplicación de métricas de centralidad y conectividad
+- Visualización de resultados y comunidades detectada
+
+  ---
+###  Ejecución del Proyecto
+
+Descomprimir los archivos de datos:
+-  10_million_location.txt.zip
+-  10_million_user.txt.zip
+
+## Configurar las rutas en main.py:
+- pythondf_ubicaciones = cargar_datos_ubicaciones("ruta/a/10_million_location.txt")
+- df_usuarios = cargar_datos_usuarios("ruta/a/10_million_user.txt")
+
+## Ejecutar el análisis completo:
+bashpython main.py 
 
 ##  Estructura del Código
 
 El proyecto está organizado en módulos especializados para mantener la claridad y separación de responsabilidades:
-
+  ---
 ### 1. `cargador.py` – Carga de Datos
 
 - Implementa carga optimizada de archivos de ubicaciones y usuarios
@@ -121,24 +166,5 @@ El proyecto está organizado en módulos especializados para mantener la clarida
 - `centralidad.png` – Gráfico de nodos más relevantes
 - `analisis.log` – Log del proceso de análisis
 
----
+--
 
-##  Estado del Proyecto
-
-- [x] Estructura modular funcional  
-- [x] Detección de comunidades sin librerías externas  
-- [x] BFS y métricas de caminos más cortos  
-- [x] Visualización estática  
-
-
----
-
-##  Autores
-
-- 📌 Nombre Apellido 1 
-- 📌 Nombre Apellido 2 
----
-
-##  Requisitos
-
-t
