@@ -13,8 +13,8 @@ Este proyecto tiene como objetivo analizar y visualizar la estructura de un graf
 ###  Requisitos
 
 Archivos necesarios
-10_million_user.txt: Contiene las relaciones de amistad entre usuarios.
-10_million_location.txt: Contiene las coordenadas geográficas de cada usuario
+- 10_million_user.txt: Contiene las relaciones de amistad entre usuarios.
+- 10_million_location.txt: Contiene las coordenadas geográficas de cada usuario
 ---
 ###  Librerias
 - pandas
@@ -151,20 +151,62 @@ El proyecto está organizado en módulos especializados para mantener la clarida
 - Louvain optimizado con pre-cálculo de grados
 - BFS con estructuras de baja sobrecarga
 
-###  Visualización
-
-- Visualizaciones con `matplotlib` y `seaborn`
-- Escalas logarítmicas para mejor análisis visual
-- Exportación directa a archivos `.png`
-
 ---
+### Preprocesamiento de Datos
+## 1. Carga Optimizada de Datos
+El módulo cargador.py implementa:
+- Detección automática de separadores: Identifica automáticamente si usa comas, tabulaciones o espacios
+- Procesamiento por lotes: Maneja archivos de 10M+ líneas de forma eficiente
+- Validación de formato: Verifica integridad y consistencia de los datos
+- Gestión de memoria: Utiliza Polars con streaming para optimizar el uso de RAM
 
-##  Archivos de Salida Esperados
+## 2. Limpieza de Datos
+python# Validación de coordenadas geográficas
+df.filter((pl.col("lat") >= -90) & (pl.col("lat") <= 90))
+df.filter((pl.col("long") >= -180) & (pl.col("long") <= 180))
 
-- `comunidades.png` – Visualización de comunidades
-- `distribucion_grados.png` – Histograma de grados
-- `centralidad.png` – Gráfico de nodos más relevantes
-- `analisis.log` – Log del proceso de análisis
+# Manejo de valores nulos y líneas vacías
+df.filter(pl.col("lista_adyacencia") != "")
+3. Construcción del Grafo
+
+## Pre-inicialización: Crea todas las estructuras de datos antes del procesamiento
+Procesamiento en lotes: Procesa 50,000 nodos por iteración
+Validación de índices: Verifica que todos los IDs estén en el rango válido [1, 10M]
+Eliminación de duplicados: Previene aristas múltiples entre los mismos nodos
+
+### Análisis Exploratorio de Datos (EDA)
+## Análisis de Ubicaciones Geográficas
+
+Distribución espacial:
+
+- Histogramas de latitudes y longitudes
+- Detección de clusters geográficos
+- Identificación de valores atípicos usando IQR
+
+
+Estadísticas descriptivas:
+python# Métricas calculadas
+- Rango de coordenadas: [lat_min, lat_max], [long_min, long_max]
+- Valores nulos por columna
+- Distribución de usuarios por región
+
+### Análisis de Conectividad Social
+
+## Distribución de grados:
+
+Número de conexiones por usuario
+Detección de usuarios altamente conectados (hubs)
+Análisis de nodos aislados
+
+
+
+
+## Visualizaciones Generadas
+
+histograma_latitudes.png: Distribución geográfica vertical
+histograma_longitudes.png: Distribución geográfica horizontal
+histograma_vecinos_usuarios.png: Distribución de conectividad social
+
 
 --
 
